@@ -1,17 +1,48 @@
-<template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
-</template>
-
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import DirList from '../public/static/node_modules.json'
+import ItemDirectory from "./components/ItemDirectory";
+import ItemLeave from "./components/ItemLeave";
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  methods: {
+    leaveHandler (value) {
+      this.selectedLeave = value
+    }
+  },
+  data() {
+    return {
+      selectedLeave: ''
+    }
+  },
+  render(h) {
+    const renderDirList = (item) => {
+      const isItemDir = item.type === 'directory';
+
+      if (isItemDir) {
+        return h(ItemDirectory,  [
+          h('span', {slot: 'directory-name'}, [item.name]),
+          h('div', {slot: 'directory-content'}, item.contents.map(renderDirList)),
+        ])
+      } else {
+        return h(
+            ItemLeave,
+            {
+              props: {type: item.type, name: `${item.name}`, selectedLeave: this.selectedLeave },
+              on: {onSelectedLeave: value => this.leaveHandler(value)}
+            },
+            [
+              h(
+                  'span',
+                  {slot: 'default'},
+                  [item.name]
+              )
+            ]
+        )
+      }
+    }
+
+    return renderDirList(DirList)
   }
 }
 </script>
